@@ -1,0 +1,91 @@
+series: focal
+applications:
+  easyrsa:
+    charm: easyrsa
+    channel: stable
+    revision: 20
+    resources:
+      easyrsa: 2
+    num_units: 1
+    to:
+    - "7"
+    constraints: arch=amd64
+  etcd:
+    charm: etcd
+    channel: stable
+    revision: 706
+    resources:
+      core: 0
+      etcd: 3
+      snapshot: 0
+    num_units: 3
+    to:
+    - "6"
+    - "8"
+    - "9"
+    constraints: arch=amd64
+    storage:
+      data: loop,1024M
+  mysql-innodb-cluster:
+    charm: mysql-innodb-cluster
+    channel: 8.0/stable
+    revision: 30
+   num_units: 3
+    to:
+    - "3"
+    - "4"
+    - "5"
+    constraints: arch=amd64
+  vault:
+    charm: vault
+    channel: stable
+    revision: 54
+    resources:
+      core: 0
+      vault: 0
+    num_units: 3
+    to:
+    - "0"
+    - "1"
+    - "2"
+    constraints: arch=amd64
+  vault-hacluster:
+    charm: hacluster
+    channel: stable
+    revision: 83
+    options:
+      cluster_count: 3
+  vault-mysql-router:
+    charm: mysql-router
+    channel: 8.0/stable
+    revision: 35
+machines:
+  "0":
+    constraints: arch=amd64
+  "1":
+    constraints: arch=amd64
+  "2":
+    constraints: arch=amd64
+  "3":
+    constraints: arch=amd64
+  "4":
+    constraints: arch=amd64
+  "5":
+    constraints: arch=amd64
+  "6":
+    constraints: arch=amd64
+  "7":
+    constraints: arch=amd64
+  "8":
+    constraints: arch=amd64
+  "9":
+    constraints: arch=amd64
+relations:
+- - vault-mysql-router:db-router
+  - mysql-innodb-cluster:db-router
+- - vault-mysql-router:shared-db
+  - vault:shared-db
+- - vault:ha
+  - vault-hacluster:ha
+- - etcd:certificates
+  - easyrsa:client
