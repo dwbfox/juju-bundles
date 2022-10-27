@@ -1,0 +1,82 @@
+series: focal
+applications:
+  containerd:
+    charm: containerd
+    channel: stable
+  easyrsa:
+    charm: easyrsa
+    channel: stable
+    annotations:
+      gui-x: "90"
+      gui-y: "420"
+    constraints: arch=amd64 cpu-cores=1 mem=4096 root-disk=16384
+  etcd:
+    charm: etcd
+    channel: stable
+    revision: 718
+    options:
+      channel: 3.4/stable
+    annotations:
+      gui-x: "800"
+      gui-y: "420"
+    constraints: arch=amd64 cpu-cores=2 mem=8192 root-disk=16384
+    storage:
+      data: loop,1024M
+  flannel:
+    charm: flannel
+    channel: stable
+    revision: 45
+  kubeapi-load-balancer:
+    charm: kubeapi-load-balancer
+    channel: stable
+    revision: 42
+    expose: true
+    annotations:
+      gui-x: "450"
+      gui-y: "250"
+    constraints: arch=amd64 cpu-cores=1 mem=4096 root-disk=16384
+  kubernetes-control-plane:
+    charm: kubernetes-control-plane
+    channel: stable
+    revision: 204
+    options:
+      channel: 1.26/edge
+    annotations:
+      gui-x: "800"
+      gui-y: "850"
+    constraints: arch=amd64 cpu-cores=2 mem=8192 root-disk=16384
+  kubernetes-worker:
+    charm: kubernetes-worker
+    channel: stable
+    expose: true
+    options:
+      channel: 1.26/edge
+    annotations:
+      gui-x: "90"
+      gui-y: "850"
+    constraints: arch=amd64 cpu-cores=2 mem=8192 root-disk=16384
+relations:
+- - kubernetes-control-plane:loadbalancer-external
+  - kubeapi-load-balancer:lb-consumers
+- - kubernetes-control-plane:loadbalancer-internal
+  - kubeapi-load-balancer:lb-consumers
+- - kubernetes-control-plane:kube-control
+  - kubernetes-worker:kube-control
+- - kubernetes-control-plane:certificates
+  - easyrsa:client
+- - etcd:certificates
+  - easyrsa:client
+- - kubernetes-control-plane:etcd
+  - etcd:db
+- - kubernetes-worker:certificates
+  - easyrsa:client
+- - kubeapi-load-balancer:certificates
+  - easyrsa:client
+- - flannel:cni
+  - kubernetes-worker:cni
+- - flannel:cni
+  - kubernetes-control-plane:cni
+- - containerd:containerd
+  - kubernetes-worker:container-runtime
+- - containerd:containerd
+  - kubernetes-control-plane:container-runtime

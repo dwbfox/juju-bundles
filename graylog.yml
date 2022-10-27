@@ -1,0 +1,56 @@
+series: focal
+applications:
+  elasticsearch:
+    charm: elasticsearch
+    channel: stable
+    revision: 59
+    num_units: 3
+    to:
+    - "2"
+    - "3"
+    - "4"
+    constraints: arch=amd64
+  graylog:
+    charm: graylog
+    channel: stable
+    revision: 55
+    resources:
+      core: -1
+      graylog: -1
+    num_units: 1
+    to:
+    - "0"
+    constraints: arch=amd64
+  mongodb:
+    charm: mongodb
+    channel: stable
+    revision: 75
+    num_units: 3
+    to:
+    - "6"
+    - "7"
+    - "8"
+    expose: true
+    options:
+      replicaset: graylog_rs
+    constraints: arch=amd64
+machines:
+  "0":
+    constraints: arch=amd64
+  "2":
+    constraints: arch=amd64
+  "3":
+    constraints: arch=amd64
+  "4":
+    constraints: arch=amd64
+  "6":
+    constraints: arch=amd64
+  "7":
+    constraints: arch=amd64
+  "8":
+    constraints: arch=amd64
+relations:
+- - graylog:elasticsearch
+  - elasticsearch:client
+- - graylog:mongodb
+  - mongodb:database
